@@ -121,9 +121,11 @@ class CLIModule(BaseModule):
             target_version = self.target_version()
             if current_version != target_version:
                 self.install(version=target_version)
-        if self.params.get('state', 'present') == 'absent':
-            if current_version is not None:
-                self.uninstall()
+        if (
+            self.params.get('state', 'present') == 'absent'
+            and current_version is not None
+        ):
+            self.uninstall()
         self.exit()
 
     def current_version(self):
@@ -152,7 +154,7 @@ class CLIModule(BaseModule):
             return err[:-1].decode()
         except OSError as e:
             if e.errno == errno.EACCES:
-                self.fail('secrethub_cli: found {} but cannot execute: {}'.format(path, e))
+                self.fail(f'secrethub_cli: found {path} but cannot execute: {e}')
             if e.errno == errno.ENOENT:
                 # The file does not exist, so there is no current version.
                 return None
@@ -188,16 +190,14 @@ class CLIModule(BaseModule):
         try:
             return urlopen('https://get.secrethub.io/releases/LATEST').read().decode()
         except IOError as e:
-            self.fail('secrethub_cli: failed to fetch latest version: {}'.format(e))
+            self.fail(f'secrethub_cli: failed to fetch latest version: {e}')
 
     def bin_path(self):
         """
         :return: The absolute path to the cli binary.
         :rtype: str
         """
-        bin_name = 'secrethub'
-        if platform.system() == 'Windows':
-            bin_name = 'secrethub.exe'
+        bin_name = 'secrethub.exe' if platform.system() == 'Windows' else 'secrethub'
         return os.path.join(self.install_dir(), bin_name)
 
     def install_dir(self):
@@ -211,8 +211,7 @@ class CLIModule(BaseModule):
         :return: The directory in which the binary should be installed.
         :rtype: str
         """
-        path = self.params.get('install_dir')
-        if path:
+        if path := self.params.get('install_dir'):
             return path
         if platform.system() == 'Windows':
             # TODO: Test whether this works on a windows machine.
@@ -275,7 +274,7 @@ class CLIModule(BaseModule):
             cleanup()
             if e.errno == errno.EACCES:
                 # TODO: Do we want to have a more descriptive error message?
-                self.fail('secrethub_cli: {}'.format(e))
+                self.fail(f'secrethub_cli: {e}')
             raise
         cleanup()
         os.chmod(self.bin_path(), 0o711)
@@ -295,7 +294,7 @@ class CLIModule(BaseModule):
             })
         except OSError as e:
             if e.errno == errno.EACCES:
-                self.fail('secrethub_cli: {}'.format(e))
+                self.fail(f'secrethub_cli: {e}')
             raise
 
 

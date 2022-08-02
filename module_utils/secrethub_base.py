@@ -66,8 +66,7 @@ class BaseModule(AnsibleModule):
         """
         options = {}
         for name in ['cli_path', 'config_dir', 'credential', 'credential_passphrase']:
-            option = self.get_option(name)
-            if option:
+            if option := self.get_option(name):
                 options[name] = option
         return Client(**options)
 
@@ -83,7 +82,6 @@ class BaseModule(AnsibleModule):
         :return: The value of the retrieved option.
         :rtype: str | None
         """
-        option = self.params.get(name)
-        if not option:
-            option = os.environ.get('SECRETHUB_'.format(name.upper()), None)
-        return option
+        return self.params.get(name) or os.environ.get(
+            'SECRETHUB_'.format(name.upper()), None
+        )

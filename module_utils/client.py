@@ -104,7 +104,7 @@ class Client:
         """
         command = [self._cli_path]
         if self.config_dir:
-            command.append('--config-dir={}'.format(self.config_dir))
+            command.append(f'--config-dir={self.config_dir}')
         command += args
 
         env = os.environ.copy()
@@ -159,7 +159,7 @@ class CLINotFound(CLIInaccessible):
         self.cli_path = cli_path
 
     def __str__(self):
-        return 'cannot find the SecretHub CLI at: {}'.format(self.cli_path)
+        return f'cannot find the SecretHub CLI at: {self.cli_path}'
 
 
 class CLINotPermitted(CLIInaccessible):
@@ -171,7 +171,7 @@ class CLINotPermitted(CLIInaccessible):
         self.cli_path = cli_path
 
     def __str__(self):
-        return 'cannot access the SecretHub CLI at: {} : permission denied'.format(self.cli_path)
+        return f'cannot access the SecretHub CLI at: {self.cli_path} : permission denied'
 
 
 class ReadError(Error):
